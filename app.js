@@ -10,6 +10,104 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+// employee array
+let employeeArray = [];
+const firstWhen = (data) => !!data.managerName && employeeArray.length < 1
+const secondWhen = (data) => !!data.managerName || (employeeArray.length > 0 && data.newMember != "None");
+
+// questions per cards 
+
+const questions = [{
+        type: "input",
+        message: "Hello manager, what is your name?",
+        name: "managerName",
+        when: (data) => !data.managerName && employeeArray.length < 1
+    },
+    {
+        type: "input",
+        message: "What is your employee ID",
+        name: "managerID",
+        when: firstWhen
+    },
+    {
+        type: "input",
+        message: "What is your email address?",
+        name: "managerEmail",
+        when: firstWhen
+    },
+    {
+        type: "input",
+        message: "What is your office number?",
+        name: "officeNumber",
+        when: firstWhen
+    },
+    {
+        type: "list",
+        message: "Who would you like to add?",
+        name: "newMember",
+        choices: ["Engineer", "Intern", "None"],
+        when: (data) => !!data.managerName || employeeArray.length > 0
+    },
+    {
+        type: "input",
+        message: "What is this employee's name?",
+        name: "employeeName",
+        when: secondWhen
+    },
+    {
+        type: "input",
+        message: "What is this employee's ID?",
+        name: "employeeID",
+        when: secondWhen
+    },
+    {
+        type: "input",
+        message: "What is this employee's email address?",
+        name: "employeeEmail",
+        when: secondWhen
+    },
+    {
+        type: "input",
+        message: "What is the engineer's Github username?",
+        name: "engineerGithub",
+        when: (data) => data.newMember === "Engineer" && secondWhen(data)
+    },
+    {
+        type: "input",
+        message: "What school does the intern attend?",
+        name: "internSchool",
+        when: (data) => data.newMember === "Intern" && secondWhen(data)
+    }
+]
+
+// questions
+async function createTeam() {
+    const data = await inquirer
+        .prompt(questions)
+    if (data.managerName) {
+        let newManager = new Manager(data.managerName, data.managerID, data.managerEmail, data.officeNumber);
+        employeeArray.push(newManager);
+    }
+    if (data.newMember === "Engineer") {
+        let newEngineer = new Engineer(data.employeeName, data.employeeID, data.employeeEmail, data.engineerGithub)
+        employeeArray.push(newEngineer);
+        return createTeam();
+    } else if (data.newMember === "Intern") {
+        let newIntern = new Intern(data.employeeName, data.employeeID, data.employeeEmail, data.internSchool)
+        employeeArray.push(newIntern);
+        return createTeam();
+    } else {
+        const teamHTML = render(employeeArray);
+        fs.writeFile(outputPath, teamHTML, function(error) {
+            if (error) throw error;
+            console.log("complete");
+        });
+    }
+}
+
+createTeam();
+
+
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)

@@ -1,4 +1,18 @@
-.body {
+.jumbotron {
     background-image: url(./blue.jpg);
+    height: 300px;
+    opacity: 95%;
+    border-bottom: black;
 }
 
+.text-center{
+    padding-top: 50px;
+    color: white;
+    font-weight: bold;
+    
+    
+}
+
+/* div.row{
+    border-bottom: brown;
+} */
